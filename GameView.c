@@ -8,6 +8,8 @@
 #include "GameView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
 
+#define TRAIL_SECTION_LENGTH 8
+
 typedef struct players * Players;
      
 struct gameView {
@@ -20,7 +22,7 @@ struct gameView {
 
 struct players {
    int health;
-   char** trail[TRAIL_SIZE];  //Array of arrays containing the last 5 moves for dracula; initialised;
+   char** trail;  //Array of arrays containing the last 5 moves for dracula; initialised;
    //TODO Im thinking or turning this into a Queue, a friend showed me how he implemented one.
    
  };
@@ -39,12 +41,12 @@ int nameEqChar(int player, char character){
 
 //Goes through past plays and finds any instance a score change has been triggered
 int setScore( char * pastPlays){
-    int score = 366, i;
+    int score = GAME_START_SCORE, i;
     for (i = 0; pastPlays[i] != '\0'; i++){
         if (i%8== 0){
-            if (nameEqChar(PLAYER_DRACULA, pastPlays[i]))score--;
-            if (!nameEqChar(PLAYER_DRACULA, pastPlays[i]) && pastPlays[i+1] == 'J' && pastPlays[i+2] == 'M')score-=6;
-            //TODO ADD score-=13 if vampire matures
+            if (nameEqChar(PLAYER_DRACULA, pastPlays[i])) score-= SCORE_LOSS_DRACULA_TURN;
+            if (!nameEqChar(PLAYER_DRACULA, pastPlays[i]) && pastPlays[i+1] == 'J' && pastPlays[i+2] == 'M')score-=SCORE_LOSS_HUNTER_HOSPITAL;
+            if (!nameEqChar(PLAYER_DRACULA, pastPlays[i]) && pastPlays[i+5] == 'V') score-= SCORE_LOSS_VAMPIRE_MATURES;
         }
     }
     return score;
@@ -55,7 +57,7 @@ int setScore( char * pastPlays){
 int setTurn(char * pastPlays){
     int i, turn = 0;
     for (i = 0; pastPlays[i] != '\0'; i++){
-        if (i % 8 ==0) turn++;
+        if (i % TRAIL_SECTION_LENGTH ==0) turn++;
     }
     return turn +1;
 
@@ -65,15 +67,64 @@ int setTurn(char * pastPlays){
 void setTrail(GameView g, int player, char * pastPlays){
     int i, trailCount;
     for (i = 0; pastPlays[i] != '\0'; i++){
-        if(i%8==0 && nameEqChar(player, pastPlays[trailCount])){
+        if(i%TRAIL_SECTION_LENGTH==0 && nameEqChar(player, pastPlays[trailCount])){
             g->player[player]->trail[trailCount] = malloc(7);
             int j;
             for (j = 0; j < 7; j++) g->player[player]->trail[i][j] = pastPlays[i+j];
             trailCount++;
         }
     }
+}
+
+//Determines if two chars are for a sea/ocean
+int trueSea(char first, char second){
+    if (first == 'A' && second == 'S') return 1; //Adreatic Sea
+    if (first == 'A' && second == 'O') return 1; //Atlantic Ocean
+    if (first == 'B' && second == 'B') return 1; //Bay of Biscay
+    if (first == 'B' && second == 'S') return 1; //Black Sea
+    if (first == 'E' && second == 'C') return 1; //English Channel
+    if (first == 'I' && second == 'O') return 1; //Ionian Sea
+    if (first == 'I' && second == 'R') return 1; //Irish Sea
+    if (first == 'M' && second == 'S') return 1; //Mediterranean Sea
+    if (first == 'N' && second == 'S') return 1; //North Sea
+    if (first == 'T' && second == 'S') return 1; //Tyhrennian Sea
+    return 0;
+}
+
+//A function that determines the score for each of the characters
+int setHealth(GameView g, int player){
+    char ** playerTrail = g->player[player]->trail;
+    int health = 0;
+    if (player >= PLAYER_LORD_GODALMING && player <= PLAYER_MINA_HARKER){
+        health = GAME_START_HUNTER_LIFE_POINTS;
+
+        int i;
+        for (i = 0; playerTrail[i] != NULL; i++){
+            if (playerTrail[i][3] == 'T') health -= LIFE_LOSS_TRAP_ENCOUNTER;//trap
+            if (playerTrail[i][4] == 'D') health -= LIFE_LOSS_DRACULA_ENCOUNTER;//dracula
+            if (i != 0 && playerTrail[i][1] == playerTrail[i-1][1] && playerTrail[i][2] == playerTrail[i-1][2]) health += LIFE_GAIN_REST;//rest
+
+            if (health <= 0) health = 9;
+        }
+
+    } else {
+        health = GAME_START_BLOOD_POINTS;
+
+        int j;
+        for (j = 0; playerTrail[j] != NULL; j++){   
+            //hunter
+            int k;
+            for(k = 0; k < PLAYER_DRACULA; k++){
+                if (g->player[k]->trail[j][4] == 'D') health -= LIFE_LOSS_HUNTER_ENCOUNTER;
+            }
+
+            if (trueSea(playerTrail[j][1], playerTrail[j][2])) health -= LIFE_LOSS_SEA;//sea TODO work out if C?
+            if (playerTrail[j][1] == 'C' && playerTrail[j][2] == 'D') health += LIFE_GAIN_CASTLE_DRACULA;//castle
+        }
+    }
 
 
+    return health;
 }
 
 // Creates a new GameView to summarise the current state of the game
@@ -91,18 +142,18 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     int i;
     for (i = 0; i < PLAYER_DRACULA; i++){
         gameView->player[i] = malloc(sizeof(struct players)); 
-        gameView->player[i]->health = GAME_START_HUNTER_LIFE_POINTS;
         gameView->player[i]->trail = malloc(7*GAME_START_SCORE);
         setTrail(gameView, i, pastPlays);
+        gameView->player[i]->health = setHealth(gameView, i);
     }
     
     //initialise dracula
     gameView->player[PLAYER_DRACULA] = malloc(sizeof(struct players)); 
-    gameView->player[PLAYER_DRACULA]->health = GAME_START_BLOOD_POINTS;
     gameView->player[PLAYER_DRACULA]->trail = malloc(7*GAME_START_SCORE);
     setTrail(gameView, PLAYER_DRACULA, pastPlays);
-    
-    //add the trail 
+    gameView->player[PLAYER_DRACULA]->health = setHealth(gameView, PLAYER_DRACULA);
+
+    //TODO gameView->messages = messages;
     
     return gameView;
 }
@@ -168,14 +219,17 @@ LocationID getLocation(GameView currentView, PlayerID player)
 //// Functions that return information about the history of the game
 
 // Fills the trail array with the location ids of the last 6 turns
-// just filler for rn could use more detail and debugging
+// Slighlty adjusted this function -J
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     int i ,n;
-    for(i = 0, n = 0; i < TRAIL_SIZE; i++, n++)
-          trail[i] = currentView->location[player][n];
+    for(i = 0; i < TRAIL_SIZE; i++){
+          trail[i] = currentView->player[player]->trail[n][i % 8];
+          if (i % 8 == 7) n++;
+      }
+
 }
 
 //// Functions that query the map to find information about connectivity
@@ -189,10 +243,12 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     return NULL;
 }
 
-
+/*Awesome idea, but ill comment out now for compilation
 //PRINT FUNCTIONS FOR DEBUGGING
 //add a ifdef?
 #ifndef PRINT
+
+#include <stdio.h>
 void printIndex (char *indexName, LocationID *index, int size){
     printf("*********\n%s:\n", indexName);
     int i;
@@ -247,3 +303,4 @@ void printLinkLoc (char *name, Link a, int size) {
     printf("\nfin\n************\n");
 }
 #endif
+*/
