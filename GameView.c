@@ -15,12 +15,14 @@ struct gameView {
     int round;                      //Current round, starting at 0, increments every 5 turns
     int score;                      //The hunters' score starting at 366
     Players player[NUM_PLAYERS];    //5 structs containing the players data
+    PlayerMessage messages[TRAIL_SIZE]; //messages here or in player data ? - akeef
 };
 
 struct players {
    int health;
-    char** trail;               //Array of arrays containing the last 5 moves for dracula
-    //TODO Im thinking or turning this into a Queue, a friend showed me how he implemented one.
+   char** trail[TRAIL_SIZE];  //Array of arrays containing the last 5 moves for dracula; initialised;
+   //TODO Im thinking or turning this into a Queue, a friend showed me how he implemented one.
+   
  };
 
 
@@ -100,6 +102,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     gameView->player[PLAYER_DRACULA]->trail = malloc(7*GAME_START_SCORE);
     setTrail(gameView, PLAYER_DRACULA, pastPlays);
     
+    //add the trail 
     
     return gameView;
 }
@@ -165,10 +168,14 @@ LocationID getLocation(GameView currentView, PlayerID player)
 //// Functions that return information about the history of the game
 
 // Fills the trail array with the location ids of the last 6 turns
+// just filler for rn could use more detail and debugging
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    int i ,n;
+    for(i = 0, n = 0; i < TRAIL_SIZE; i++, n++)
+          trail[i] = currentView->location[player][n];
 }
 
 //// Functions that query the map to find information about connectivity
@@ -177,8 +184,66 @@ void getHistory(GameView currentView, PlayerID player,
 
 LocationID *connectedLocations(GameView currentView, int *numLocations,
                                LocationID from, PlayerID player, Round round,
-                               int road, int rail, int sea)
-{
+                               int road, int rail, int sea){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     return NULL;
 }
+
+
+//PRINT FUNCTIONS FOR DEBUGGING
+//add a ifdef?
+#ifndef PRINT
+void printIndex (char *indexName, LocationID *index, int size){
+    printf("*********\n%s:\n", indexName);
+    int i;
+    for (i = 0; i < size+1; i++) {
+        if (index[i] == CONNECTED) printf("-- %d --", i); 
+    } 
+    printf("\n*********\n");
+}
+
+void printList (char *listName, LocationID *list, int size){
+    printf("*********\n%s:\n", listName);
+    int i;
+    for (i = 0; i < size; i++) {
+        if (list[i] == NOWHERE) break;
+        printf("%d: %d   ", i, list[i]);   
+        if (((i % 9) == 0) && i != 0) printf("\n");
+    } 
+    printf("\n*********\n");
+}
+ 
+ 
+void printLinkIndex (char *name, Link a, int size){
+    printf("************\n%s\n************\n", name);
+    int i;
+    for (i = 0; i < size; i++) {
+        if (a[i].loc != NOWHERE) {
+            printf("%s[%d]:    loc: %d    type: %d    dist: %f\n", name, 
+                    i, a[i].loc, a[i].type, a[i].dist);    
+        }
+    }
+    printf("fin\n************\n");
+}
+
+void printLinkList (char *name, Link a, int size) {
+    printf("************\n%s\n************\n", name);
+    int i;
+    for (i = 0; i < size && a[i].loc != NOWHERE; i++) {
+        printf("%s[%d]:    loc: %d    type: %d    dist: %f\n", name, 
+               i, a[i].loc, a[i].type, a[i].dist);    
+    }
+    printf("fin\n************\n");
+
+}
+
+void printLinkLoc (char *name, Link a, int size) {
+    printf("************\n%s\n************\n%s:", name, name);
+    int i;
+    for (i = 0; i < size && a[i].loc != NOWHERE; i++) {
+        printf(" %d->%d ", i, a[i].loc); 
+        if (i % 9 == 0) printf("\n");   
+    }
+    printf("\nfin\n************\n");
+}
+#endif
