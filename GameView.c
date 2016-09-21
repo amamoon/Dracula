@@ -18,7 +18,7 @@ struct gameView {
     int round;                      //Current round, starting at 0, increments every 5 turns
     int score;                      //The hunters' score starting at 366
     Players player[NUM_PLAYERS];    //5 structs containing the players data
-    PlayerMessage messages[TRAIL_SIZE]; //messages here or in player data ? - akeef
+    PlayerMessage messages[MESSAGE_SIZE]; //messages here or in player data ? - akeef
 };
 
 struct players {
@@ -47,7 +47,7 @@ void printView(GameView g, char * pastPlays){
 }
 
 //This function determines if a given character corresponds to the correct player
-int nameEqChar(int player, char character){
+static int nameEqChar(int player, char character){
     if (player == PLAYER_LORD_GODALMING && character == 'G')return 1;
     if (player == PLAYER_DR_SEWARD && character == 'S')return 1;
     if (player == PLAYER_VAN_HELSING && character == 'H')return 1;
@@ -71,7 +71,7 @@ int setScore( char * pastPlays){
 
 
 // Goes through all pastplays and counts how many turns have passed
-int setTurn(char * pastPlays){
+static int setTurn(char * pastPlays){
     int i, turn = 0;
     for (i = 0; pastPlays[i] != '\0'; i++){
         if (i % TRAIL_SECTION_LENGTH ==0) turn++;
@@ -81,9 +81,14 @@ int setTurn(char * pastPlays){
 }
 
 //A function that isolates all of the strings in pastplays belonging to one character
+<<<<<<< HEAD
 int setTrail(GameView g, int player, char * pastPlays){
     int i, trailCount=0;
     //printf("trail = %d\n", g->player[player]->trail[0] == NULL);
+=======
+static void setTrail(GameView g, int player, char * pastPlays){
+    int i, trailCount;
+>>>>>>> 7876936e66f1b8b89d485e1ec1fca75aa4a265ea
     for (i = 0; pastPlays[i] != '\0'; i++){
         //printf("%c", pastPlays[i]);
         if(i%TRAIL_SECTION_LENGTH==0 && nameEqChar(player, pastPlays[i])){
@@ -100,6 +105,7 @@ int setTrail(GameView g, int player, char * pastPlays){
 }
 
 //Determines if two chars are for a sea/ocean
+<<<<<<< HEAD
 int trueSea(char first, char second){
     char * location = malloc(3*sizeof(char));
     location[0] = first;
@@ -124,12 +130,29 @@ int doubledBack(char * playerTrail){
         return playerTrail[2] - '0';
     }
 
+=======
+static int trueSea(char first, char second){
+    if (first == 'A' && second == 'S') return 1; //Adreatic Sea
+    if (first == 'A' && second == 'O') return 1; //Atlantic Ocean
+    if (first == 'B' && second == 'B') return 1; //Bay of Biscay
+    if (first == 'B' && second == 'S') return 1; //Black Sea
+    if (first == 'E' && second == 'C') return 1; //English Channel
+    if (first == 'I' && second == 'O') return 1; //Ionian Sea
+    if (first == 'I' && second == 'R') return 1; //Irish Sea
+    if (first == 'M' && second == 'S') return 1; //Mediterranean Sea
+    if (first == 'N' && second == 'S') return 1; //North Sea
+    if (first == 'T' && second == 'S') return 1; //Tyhrennian Sea
+>>>>>>> 7876936e66f1b8b89d485e1ec1fca75aa4a265ea
     return 0;
 }
 
 //A function that determines the score for each of the characters
+<<<<<<< HEAD
 int setHealth(GameView g, char * pastPlays, int player){
     //printView(g, pastPlays);
+=======
+static int setHealth(GameView g, int player){
+>>>>>>> 7876936e66f1b8b89d485e1ec1fca75aa4a265ea
     char ** playerTrail = g->player[player]->trail;
     int health = 0;
     if (player >= PLAYER_LORD_GODALMING && player <= PLAYER_MINA_HARKER){
