@@ -10,7 +10,7 @@
      
 struct dracView {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    GameView game; //pls no
+    GameView Game; //pls no
     int health[NUM_PLAYERS]; //been asking around and apparently this is better as an array? figured it out
     int nTrap[NUM_MAP_LOCATIONS];
     int score;
@@ -22,7 +22,7 @@ struct dracView {
 DracView newDracView(char *pastPlays, PlayerMessage messages[]){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     DracView dracView = malloc(sizeof(struct dracView));
-    dracView->hello = 42;
+    dracView->score = 366;
     return dracView;
 }
      
@@ -31,7 +31,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[]){
 void disposeDracView(DracView toBeDeleted){
     //COMPLETE THIS IMPLEMENTATION
     assert(toBeDeleted != NULL);
-    disposeGameView(toBeDeleted->game);
+    disposeGameView(toBeDeleted->Game);
     free( toBeDeleted );
 }
 
@@ -41,7 +41,7 @@ void disposeDracView(DracView toBeDeleted){
 // Get the current round
 Round giveMeTheRound(DracView currentView){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return currentView->game->round; //smart
+    return getRound(currentView->Game); //smart
 }
 
 // Get the current score
@@ -59,7 +59,7 @@ int howHealthyIs(DracView currentView, PlayerID player){
 // Get the current location id of a given player
 LocationID whereIs(DracView currentView, PlayerID player){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return getLocation(currentView, player);
+    return getLocation(currentView->Game, player);
 }
 
 // Get the most recent move of a given player

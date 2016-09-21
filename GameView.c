@@ -17,7 +17,7 @@ struct gameView {
     int round;                      //Current round, starting at 0, increments every 5 turns
     int score;                      //The hunters' score starting at 366
     Players player[NUM_PLAYERS];    //5 structs containing the players data
-    PlayerMessage messages[TRAIL_SIZE]; //messages here or in player data ? - akeef
+    PlayerMessage messages[MESSAGE_SIZE]; //messages here or in player data ? - akeef
 };
 
 struct players {
@@ -30,7 +30,7 @@ struct players {
 
 
 //This function determines if a given character corresponds to the correct player
-int nameEqChar(int player, char character){
+static int nameEqChar(int player, char character){
     if (player == PLAYER_LORD_GODALMING && character == 'G')return 1;
     if (player == PLAYER_DR_SEWARD && character == 'S')return 1;
     if (player == PLAYER_VAN_HELSING && character == 'H')return 1;
@@ -54,7 +54,7 @@ int setScore( char * pastPlays){
 
 
 // Goes through all pastplays and counts how many turns have passed
-int setTurn(char * pastPlays){
+static int setTurn(char * pastPlays){
     int i, turn = 0;
     for (i = 0; pastPlays[i] != '\0'; i++){
         if (i % TRAIL_SECTION_LENGTH ==0) turn++;
@@ -64,7 +64,7 @@ int setTurn(char * pastPlays){
 }
 
 //A function that isolates all of the strings in pastplays belonging to one character
-void setTrail(GameView g, int player, char * pastPlays){
+static void setTrail(GameView g, int player, char * pastPlays){
     int i, trailCount;
     for (i = 0; pastPlays[i] != '\0'; i++){
         if(i%TRAIL_SECTION_LENGTH==0 && nameEqChar(player, pastPlays[trailCount])){
@@ -77,7 +77,7 @@ void setTrail(GameView g, int player, char * pastPlays){
 }
 
 //Determines if two chars are for a sea/ocean
-int trueSea(char first, char second){
+static int trueSea(char first, char second){
     if (first == 'A' && second == 'S') return 1; //Adreatic Sea
     if (first == 'A' && second == 'O') return 1; //Atlantic Ocean
     if (first == 'B' && second == 'B') return 1; //Bay of Biscay
@@ -92,7 +92,7 @@ int trueSea(char first, char second){
 }
 
 //A function that determines the score for each of the characters
-int setHealth(GameView g, int player){
+static int setHealth(GameView g, int player){
     char ** playerTrail = g->player[player]->trail;
     int health = 0;
     if (player >= PLAYER_LORD_GODALMING && player <= PLAYER_MINA_HARKER){
