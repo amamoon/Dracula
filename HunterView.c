@@ -10,7 +10,7 @@
      
 struct hunterView {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    Gameview Game;
+    GameView Game;
     int round;
     int score;
     int player[NUM_PLAYERS];
@@ -25,7 +25,8 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     HunterView hunterView = malloc(sizeof(struct hunterView));
-    hunterView->hello = 42;
+    hunterView->Game = newGameView(pastPlays, messages);
+    hunterView->score = 366;
     return hunterView;
 }
      
@@ -51,7 +52,7 @@ Round giveMeTheRound(HunterView currentView)
 PlayerID whoAmI(HunterView currentView)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return currentView->player;
+    return (getCurrentPlayer(currentView->Game));
 }
 
 // Get the current score
@@ -72,7 +73,7 @@ int howHealthyIs(HunterView currentView, PlayerID player)
 LocationID whereIs(HunterView currentView, PlayerID player)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return getLocation(currentView, player);
+    return getLocation(currentView->Game, player);
 }
 
 //// Functions that return information about the history of the game
