@@ -57,7 +57,7 @@ static int nameEqChar(int player, char character){
 }
 
 //Goes through past plays and finds any instance a score change has been triggered
-int setScore( char * pastPlays){
+static int setScore( char * pastPlays){
     int score = GAME_START_SCORE, i;
     for (i = 0; pastPlays[i] != '\0'; i++){
         if (i%8== 0){
@@ -81,14 +81,9 @@ static int setTurn(char * pastPlays){
 }
 
 //A function that isolates all of the strings in pastplays belonging to one character
-<<<<<<< HEAD
-int setTrail(GameView g, int player, char * pastPlays){
+
+static int setTrail(GameView g, int player, char * pastPlays){
     int i, trailCount=0;
-    //printf("trail = %d\n", g->player[player]->trail[0] == NULL);
-=======
-static void setTrail(GameView g, int player, char * pastPlays){
-    int i, trailCount;
->>>>>>> 7876936e66f1b8b89d485e1ec1fca75aa4a265ea
     for (i = 0; pastPlays[i] != '\0'; i++){
         //printf("%c", pastPlays[i]);
         if(i%TRAIL_SECTION_LENGTH==0 && nameEqChar(player, pastPlays[i])){
@@ -105,8 +100,8 @@ static void setTrail(GameView g, int player, char * pastPlays){
 }
 
 //Determines if two chars are for a sea/ocean
-<<<<<<< HEAD
-int trueSea(char first, char second){
+
+static int trueSea(char first, char second){
     char * location = malloc(3*sizeof(char));
     location[0] = first;
     location[1] = second;
@@ -125,34 +120,16 @@ int trueSea(char first, char second){
 }
 
 //A function that determines if dracula doubled back
-int doubledBack(char * playerTrail){
+static int doubledBack(char * playerTrail){
     if (playerTrail[1] == 'D' && playerTrail[2] >= '1' && playerTrail[2] <= '5'){
         return playerTrail[2] - '0';
     }
-
-=======
-static int trueSea(char first, char second){
-    if (first == 'A' && second == 'S') return 1; //Adreatic Sea
-    if (first == 'A' && second == 'O') return 1; //Atlantic Ocean
-    if (first == 'B' && second == 'B') return 1; //Bay of Biscay
-    if (first == 'B' && second == 'S') return 1; //Black Sea
-    if (first == 'E' && second == 'C') return 1; //English Channel
-    if (first == 'I' && second == 'O') return 1; //Ionian Sea
-    if (first == 'I' && second == 'R') return 1; //Irish Sea
-    if (first == 'M' && second == 'S') return 1; //Mediterranean Sea
-    if (first == 'N' && second == 'S') return 1; //North Sea
-    if (first == 'T' && second == 'S') return 1; //Tyhrennian Sea
->>>>>>> 7876936e66f1b8b89d485e1ec1fca75aa4a265ea
     return 0;
 }
 
 //A function that determines the score for each of the characters
-<<<<<<< HEAD
-int setHealth(GameView g, char * pastPlays, int player){
+static int setHealth(GameView g, char * pastPlays, int player){
     //printView(g, pastPlays);
-=======
-static int setHealth(GameView g, int player){
->>>>>>> 7876936e66f1b8b89d485e1ec1fca75aa4a265ea
     char ** playerTrail = g->player[player]->trail;
     int health = 0;
     if (player >= PLAYER_LORD_GODALMING && player <= PLAYER_MINA_HARKER){
