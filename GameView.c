@@ -1,6 +1,7 @@
 // GameView.c ... GameView ADT implementation
 //Edited James - 16-7 4pm
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "Globals.h"
@@ -21,13 +22,29 @@ struct gameView {
 };
 
 struct players {
-   int health;
-   char** trail;  //Array of arrays containing the last 5 moves for dracula; initialised;
-   //TODO Im thinking or turning this into a Queue, a friend showed me how he implemented one.
-   
+    int health;
+    char** trail;  //Array of arrays containing the last 5 moves for dracula; initialised;
+    int trailSize;  
  };
 
+//Prints out a given gameView for debugging
+void printView(GameView g, char * pastPlays){
+    printf("Turn = %d\n", g->turn);
+    printf("Round = %d\n", g->round);
+    printf("Score = %d\n\n", g->score);
 
+    int i;
+    for (i = 0; i <= PLAYER_DRACULA; i++){
+        printf("Player %d health = %d\n", i, g->player[i]->health);
+        int j;
+        for (j=0; g->player[i]->trail[j] != NULL; j++){
+            printf("Player %d trail[%d] = %s\n", i, j, g->player[i]->trail[j]);
+        }
+        printf("\n");
+    }
+
+    printf("Pastplays = %s\n", pastPlays);
+}
 
 //This function determines if a given character corresponds to the correct player
 int nameEqChar(int player, char character){
@@ -64,35 +81,55 @@ int setTurn(char * pastPlays){
 }
 
 //A function that isolates all of the strings in pastplays belonging to one character
-void setTrail(GameView g, int player, char * pastPlays){
-    int i, trailCount;
+int setTrail(GameView g, int player, char * pastPlays){
+    int i, trailCount=0;
+    //printf("trail = %d\n", g->player[player]->trail[0] == NULL);
     for (i = 0; pastPlays[i] != '\0'; i++){
-        if(i%TRAIL_SECTION_LENGTH==0 && nameEqChar(player, pastPlays[trailCount])){
-            g->player[player]->trail[trailCount] = malloc(7);
+        //printf("%c", pastPlays[i]);
+        if(i%TRAIL_SECTION_LENGTH==0 && nameEqChar(player, pastPlays[i])){
+            g->player[player]->trail[trailCount] = malloc(8*sizeof(char));
+            //printf("pastPlays = %s\n", pastPlays);
+            //printf("Here\n");
             int j;
-            for (j = 0; j < 7; j++) g->player[player]->trail[i][j] = pastPlays[i+j];
+            for (j = 0; j < 7; j++) g->player[player]->trail[trailCount][j] = pastPlays[i+j];
+            g->player[player]->trail[trailCount][7] = '\0';
             trailCount++;
         }
     }
+    return trailCount;
 }
 
 //Determines if two chars are for a sea/ocean
 int trueSea(char first, char second){
-    if (first == 'A' && second == 'S') return 1; //Adreatic Sea
-    if (first == 'A' && second == 'O') return 1; //Atlantic Ocean
-    if (first == 'B' && second == 'B') return 1; //Bay of Biscay
-    if (first == 'B' && second == 'S') return 1; //Black Sea
-    if (first == 'E' && second == 'C') return 1; //English Channel
-    if (first == 'I' && second == 'O') return 1; //Ionian Sea
-    if (first == 'I' && second == 'R') return 1; //Irish Sea
-    if (first == 'M' && second == 'S') return 1; //Mediterranean Sea
-    if (first == 'N' && second == 'S') return 1; //North Sea
-    if (first == 'T' && second == 'S') return 1; //Tyhrennian Sea
+    char * location = malloc(3*sizeof(char));
+    location[0] = first;
+    location[1] = second;
+    if (abbrevToID(location) == ADRIATIC_SEA) return 1; //Adreatic Sea
+    if (abbrevToID(location) == ATLANTIC_OCEAN) return 1; //Atlantic Ocean
+    if (abbrevToID(location) == BAY_OF_BISCAY) return 1; //Bay of Biscay
+    if (abbrevToID(location) == BLACK_SEA) return 1; //Black Sea
+    if (abbrevToID(location) == ENGLISH_CHANNEL) return 1; //English Channel
+    if (abbrevToID(location) == IONIAN_SEA) return 1; //Ionian Sea
+    if (abbrevToID(location) == IRISH_SEA) return 1; //Irish Sea
+    if (abbrevToID(location) == MEDITERRANEAN_SEA) return 1; //Mediterranean Sea
+    if (abbrevToID(location) == NORTH_SEA) return 1; //North Sea
+    if (abbrevToID(location) == TYRRHENIAN_SEA) return 1; //Tyhrennian Sea
+    if (first == 'S' && second == '?') return 1; //SEA_UNKNOWN
+    return 0;
+}
+
+//A function that determines if dracula doubled back
+int doubledBack(char * playerTrail){
+    if (playerTrail[1] == 'D' && playerTrail[2] >= '1' && playerTrail[2] <= '5'){
+        return playerTrail[2] - '0';
+    }
+
     return 0;
 }
 
 //A function that determines the score for each of the characters
-int setHealth(GameView g, int player){
+int setHealth(GameView g, char * pastPlays, int player){
+    //printView(g, pastPlays);
     char ** playerTrail = g->player[player]->trail;
     int health = 0;
     if (player >= PLAYER_LORD_GODALMING && player <= PLAYER_MINA_HARKER){
@@ -100,8 +137,13 @@ int setHealth(GameView g, int player){
 
         int i;
         for (i = 0; playerTrail[i] != NULL; i++){
-            if (playerTrail[i][3] == 'T') health -= LIFE_LOSS_TRAP_ENCOUNTER;//trap
-            if (playerTrail[i][4] == 'D') health -= LIFE_LOSS_DRACULA_ENCOUNTER;//dracula
+
+            int m;
+            for (m = 3; m < 7;m++){
+                if (playerTrail[i][m] == 'T') health -= LIFE_LOSS_TRAP_ENCOUNTER;//trap
+                if (playerTrail[i][m] == 'D') health -= LIFE_LOSS_DRACULA_ENCOUNTER;//dracula
+            }
+
             if (i != 0 && playerTrail[i][1] == playerTrail[i-1][1] && playerTrail[i][2] == playerTrail[i-1][2]) health += LIFE_GAIN_REST;//rest
 
             if (health <= 0) health = 9;
@@ -111,18 +153,26 @@ int setHealth(GameView g, int player){
         health = GAME_START_BLOOD_POINTS;
 
         int j;
-        for (j = 0; playerTrail[j] != NULL; j++){   
+        for (j = 0; playerTrail[j] != NULL; j++){
             //hunter
-            int k;
-            for(k = 0; k < PLAYER_DRACULA; k++){
-                if (g->player[k]->trail[j][4] == 'D') health -= LIFE_LOSS_HUNTER_ENCOUNTER;
+            int DB = doubledBack(playerTrail[j]);
+            if (DB && j != 0){
+                if (trueSea(playerTrail[j-DB][1], playerTrail[j-DB][2])) health-= LIFE_LOSS_SEA;
             }
-
             if (trueSea(playerTrail[j][1], playerTrail[j][2])) health -= LIFE_LOSS_SEA;//sea TODO work out if C?
             if (playerTrail[j][1] == 'C' && playerTrail[j][2] == 'D') health += LIFE_GAIN_CASTLE_DRACULA;//castle
         }
-    }
 
+        int k;
+        for (k = 0; pastPlays[k] != '\0'; k++){
+            if (k%8==0 && !nameEqChar(pastPlays[k], PLAYER_DRACULA)){
+                int n;
+                for (n = 3; n < 7; n++){
+                    if (pastPlays[k+n] == 'D')health -= LIFE_LOSS_HUNTER_ENCOUNTER;
+                }
+            }
+        }
+    }
 
     return health;
 }
@@ -134,26 +184,41 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     GameView gameView = malloc(sizeof(struct gameView));
     
     //intialise game variables
+    //printf("Initialising Turn\n");
     gameView->turn = setTurn(pastPlays);
+    //printf("Initialising Round\n");
     gameView->round = (gameView->turn -1)/5;
+    //printf("Initialising Score\n");
     gameView->score = setScore(pastPlays); 
     
     //intitialise hunters
     int i;
     for (i = 0; i < PLAYER_DRACULA; i++){
+        //printf("Initialising player %d\n", i);
         gameView->player[i] = malloc(sizeof(struct players)); 
+        //printf("Initialising trail %d\n", i);
         gameView->player[i]->trail = malloc(7*GAME_START_SCORE);
-        setTrail(gameView, i, pastPlays);
-        gameView->player[i]->health = setHealth(gameView, i);
+        //printf("Initialising set trail %d\n", i);
+        gameView->player[i]->trailSize = setTrail(gameView, i, pastPlays);
+        if (gameView->player[i]->trail[gameView->player[i]->trailSize] != NULL) gameView->player[i]->trail[gameView->player[i]->trailSize] = NULL;
+        //printf("Initialising health %d\n", i);
+        gameView->player[i]->health = setHealth(gameView, pastPlays, i);
     }
     
     //initialise dracula
+        //printf("Initialising player %d\n", i);
     gameView->player[PLAYER_DRACULA] = malloc(sizeof(struct players)); 
+        //printf("Initialising trail %d\n", i);
     gameView->player[PLAYER_DRACULA]->trail = malloc(7*GAME_START_SCORE);
-    setTrail(gameView, PLAYER_DRACULA, pastPlays);
-    gameView->player[PLAYER_DRACULA]->health = setHealth(gameView, PLAYER_DRACULA);
+        //printf("Initialising set trail %d\n", i);
+    gameView->player[PLAYER_DRACULA]->trailSize = setTrail(gameView, PLAYER_DRACULA, pastPlays);
+    if (gameView->player[i]->trail[gameView->player[PLAYER_DRACULA]->trailSize] != NULL) gameView->player[i]->trail[gameView->player[PLAYER_DRACULA]->trailSize] = NULL;
 
+        //printf("Initialising health %d\n", i);
+    gameView->player[PLAYER_DRACULA]->health = setHealth(gameView, pastPlays, PLAYER_DRACULA);
     //TODO gameView->messages = messages;
+
+    //printView(gameView, pastPlays);
     
     return gameView;
 }
@@ -161,15 +226,15 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
 // Frees all memory previously allocated for the GameView toBeDeleted
 void disposeGameView(GameView toBeDeleted)
 {
-    //COMPLETE THIS IMPLEMENTATION
-    
     int i;
     for (i = 0; i <= PLAYER_DRACULA; i++){
         int j;
         for(j=0; toBeDeleted->player[i]->trail[j] != NULL; j++){
+            //printf("To be delet%s\n", toBeDeleted->player[i]->trail[j]);
             free(toBeDeleted->player[i]->trail[j]);
+            //printf("Freed player[%d] trail[%d]\n",i, j);
         }
-        free(toBeDeleted->player[PLAYER_DRACULA]->trail);
+        free(toBeDeleted->player[i]->trail);
         free(toBeDeleted->player[i]);
     }
     
@@ -209,10 +274,20 @@ LocationID getLocation(GameView currentView, PlayerID player)
     int i;
     for (i = 0; currentView->player[player]->trail[i] != NULL; i++){}
     i--;
-    char * location = malloc(2);
+    if (i < 0) return UNKNOWN_LOCATION;
+    char * location = malloc(3*sizeof(char));
     location[0] = currentView->player[player]->trail[i][1];
     location[1] = currentView->player[player]->trail[i][2];
+    location[2] = '\0';
 
+    if (location[1] == '?') {
+        if (location[0] == 'C') return CITY_UNKNOWN;//Drac Unknown
+        if (location[0] == 'S') return SEA_UNKNOWN;
+    } else if (player == PLAYER_DRACULA && location[0] == 'D' && location[1] >= '1' && location[1] <= '5'){
+        return DOUBLE_BACK_1 - 1 + location[1]-'0';
+    } else {
+        return abbrevToID(location);
+    }
     return abbrevToID(location);
 }
 
@@ -223,12 +298,29 @@ LocationID getLocation(GameView currentView, PlayerID player)
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int i ,n;
-    for(i = 0; i < TRAIL_SIZE; i++){
-          trail[i] = currentView->player[player]->trail[n][i % 8];
-          if (i % 8 == 7) n++;
-      }
+    int i, n = 0;
+    char * location = malloc(3*sizeof(char));
+    for(i = currentView->player[player]->trailSize -1; (i >=0 && n < 6); i--){
+        location[0] = currentView->player[player]->trail[i][1];
+        location[1] = currentView->player[player]->trail[i][2];
+        location[2] = '\0';
+        //printf("%s\n", location);
+        if (location[1] == '?') {
+            if (location[0] == 'C') trail[n]= CITY_UNKNOWN;//Drac Unknown
+            if (location[0] == 'S') trail[n] = SEA_UNKNOWN;
+        } else if (player == PLAYER_DRACULA && location[0] == 'D' && location[1] >= '1' && location[1] <= '5'){
+            trail[n]= DOUBLE_BACK_1 - 1 + location[1]-'0';
+        } else {
+            trail[n] = abbrevToID(location);
+        }
+        n++;
+    }
+    //printf("%d %d %d %d %d\n", trail[0], trail[1], trail[2], trail[3], trail[4]);
+    int j;
+    for (j = n; j < TRAIL_SIZE; j++){
+        trail[j] = UNKNOWN_LOCATION;
+    }
+    //printf("%d %d %d %d %d\n", trail[0], trail[1], trail[2], trail[3], trail[4]);
 
 }
 

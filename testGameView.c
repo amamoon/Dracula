@@ -20,12 +20,15 @@ int main()
     assert(getHealth(gv,PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
     assert(getScore(gv) == GAME_START_SCORE);
     assert(getLocation(gv,PLAYER_LORD_GODALMING) == UNKNOWN_LOCATION);
+    //printf("After to getLoc\n");
     printf("passed\n");
     disposeGameView(gv);
 
     printf("Test for Dracula trail and basic functions\n");
     PlayerMessage messages2[] = {"Hello","Rubbish","Stuff","","Mwahahah"};
+    //printf("Here\n");
     gv = newGameView("GST.... SAO.... HZU.... MBB.... DC?....", messages2);
+    //printf("Here\n");
     assert(getCurrentPlayer(gv) == PLAYER_LORD_GODALMING);
     assert(getRound(gv) == 1);
     assert(getLocation(gv,PLAYER_LORD_GODALMING) == STRASBOURG);
@@ -39,7 +42,9 @@ int main()
 
     printf("Test for encountering Dracula and hunter history\n");
     PlayerMessage messages3[] = {"Hello","Rubbish","Stuff","","Mwahahah","Aha!"};
+    //printf("HERE\n");
     gv = newGameView("GST.... SAO.... HCD.... MAO.... DGE.... GGED...", messages3);
+    //printf("HERE\n");
     assert(getLocation(gv,PLAYER_DRACULA) == GENEVA);
     assert(getHealth(gv,PLAYER_LORD_GODALMING) == 5);
     assert(getHealth(gv,PLAYER_DRACULA) == 30);
