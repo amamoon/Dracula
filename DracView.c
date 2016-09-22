@@ -13,17 +13,15 @@ struct dracView {
     GameView Game; //pls no
     int health[NUM_PLAYERS]; //been asking around and apparently this is better as an array? figured it out
     int nTrap[NUM_MAP_LOCATIONS];
+    int nVamp[NUM_MAP_LOCATIONS];
     int score;
-    LocationID trail[TRAIL_SIZE];
+    LocationID trail[TRAIL_SIZE][NUM_PLAYERS];
 };
      
 
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[]){
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    DracView dracView = malloc(sizeof(struct dracView));
-    dracView->score = 366;
-    return dracView;
+
 }
      
      
@@ -73,9 +71,8 @@ void lastMove(DracView currentView, PlayerID player,
 void whatsThere(DracView currentView, LocationID where,
                          int *numTraps, int *numVamps){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    //go to 'where'
-    //check data
-    //return an array ?
+    *numTraps = currentView->nTraps[where];
+    *numVamps = currentView->nVamps[where]
     return;
 }
 
@@ -85,6 +82,10 @@ void whatsThere(DracView currentView, LocationID where,
 void giveMeTheTrail(DracView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE]){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    int i = 0;
+    for (i = 0; i < TRAIL_SIZE; i++) {
+        trail[i] = currentView->trail[i][player];
+	}
 }
 
 //// Functions that query the map to find information about connectivity
@@ -93,7 +94,8 @@ void giveMeTheTrail(DracView currentView, PlayerID player,
 LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int sea){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     // call connected connections
-    return NULL;
+    return connectedLocations(currentView->game, numLocations, currentView->trueLocation, 
+    	PLAYER_DRACULA, getRound(currentView->game), road, FALSE, sea);
 }
 
 // What are the specified player's next possible moves
@@ -101,5 +103,6 @@ LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     //call connected locations
-    return NULL;
+    return connectedLocations(currentView->game, numLocations, getLocation(currentView->game, player),
+    	player,getRound(currentView->game), road, rail, sea);;
 }
