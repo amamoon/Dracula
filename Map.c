@@ -60,8 +60,9 @@ void getConnections(Map g, LocationID vertex,
     for (i=1; i <= count; i++) {
         conn[i] = curr->v;
         transport[i] = curr->type;
-        //printf("%d, %d\n", conn[i], transport[i]);
         curr = curr->next;
+        
+        //printf("%d, %d\n", conn[i], transport[i]);
     }
 }
 

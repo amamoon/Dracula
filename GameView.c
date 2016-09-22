@@ -338,6 +338,8 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     
     //Total connections
     int totalCount = numOfConnections(currentView->gameMap, from);
+    //printf("%d\n", totalCount);
+    
     //Amount of connections to be returned
     //Starts at 1 so as to include starting vertex
     int count = 1;
@@ -354,9 +356,22 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     //Set first connection as the starting vertex
     locations[0] = from;
     
+    //Set rail to 0 if rail travel is unavailable given round and player
+    if (( (player + round)%4 ==0) || (player == PLAYER_DRACULA) ) {
+        rail = 0;
+    }
+    
     //Iterate through connections and find those of the requested types
     int i;
     for (i = 1; i <= totalCount; i++) {
+        //Skip this iteration if connected vertex is a hospital
+        //And player is Dracula
+        if ((player == PLAYER_DRACULA) &&
+             (connections[i] == ST_JOSEPH_AND_ST_MARYS)) {
+            
+            continue;
+        }
+        
         //Add connection to locations[] if it is of a requested type
         if (road && (transport[i] == ROAD || transport[i] == ANY)) {
             locations[count] = connections[i];
@@ -364,12 +379,15 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
         } else if (rail && (transport[i] == RAIL || transport[i] == ANY)) {
             locations[count] = connections[i];
             count++;
-        } else if (sea && (transport[i] == SEA || transport[i] == ANY)) {
+        } else if (sea && (transport[i] == BOAT || transport[i] == ANY)) {
             locations[count] = connections[i];
             count++;
         }
+
+        //printf("Location: %d\n", locations[count-1]);
+        //printf("Transport: %d\n", transport[i]);
     }
-    
+        
     *numLocations = count;
     //printf("%d\n", *numLocations);
     return locations;
