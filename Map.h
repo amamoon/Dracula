@@ -21,4 +21,9 @@ void showMap(Map g);
 int  numV(Map g);
 int  numE(Map g, TransportID t);
 
+//Additional functions
+int numOfConnections(Map g, LocationID vertex);
+void getConnections(Map g, LocationID vertex,
+                    LocationID *conn, TransportID *transport);
+
 #endif

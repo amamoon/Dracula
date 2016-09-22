@@ -7,13 +7,14 @@
 #include "Globals.h"
 #include "Game.h"
 #include "GameView.h"
-// #include "Map.h" ... if you decide to use the Map ADT
+#include "Map.h"
 
 #define TRAIL_SECTION_LENGTH 8
 
 typedef struct players * Players;
      
 struct gameView {
+    Map gameMap;
     int turn;                       //The current turn starting at 1
     int round;                      //Current round, starting at 0, increments every 5 turns
     int score;                      //The hunters' score starting at 366
@@ -183,6 +184,9 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     GameView gameView = malloc(sizeof(struct gameView));
     
+    //Generate Map
+    gameView->gameMap = newMap(); //ADT handles locations of europe
+    
     //intialise game variables
     //printf("Initialising Turn\n");
     gameView->turn = setTurn(pastPlays);
@@ -331,8 +335,44 @@ void getHistory(GameView currentView, PlayerID player,
 LocationID *connectedLocations(GameView currentView, int *numLocations,
                                LocationID from, PlayerID player, Round round,
                                int road, int rail, int sea){
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+    
+    //Total connections
+    int totalCount = numOfConnections(currentView->gameMap, from);
+    //Amount of connections to be returned
+    //Starts at 1 so as to include starting vertex
+    int count = 1;
+    
+    //Stores data for connections
+    LocationID *connections = malloc(NUM_MAP_LOCATIONS);
+    TransportID *transport = malloc(NUM_MAP_LOCATIONS);
+
+    getConnections(currentView->gameMap, from, connections, transport);
+    
+    //Initiliase array of values to be returned
+    int *locations = malloc(NUM_MAP_LOCATIONS);
+
+    //Set first connection as the starting vertex
+    locations[0] = from;
+    
+    //Iterate through connections and find those of the requested types
+    int i;
+    for (i = 1; i <= totalCount; i++) {
+        //Add connection to locations[] if it is of a requested type
+        if (road && (transport[i] == ROAD || transport[i] == ANY)) {
+            locations[count] = connections[i];
+            count++;
+        } else if (rail && (transport[i] == RAIL || transport[i] == ANY)) {
+            locations[count] = connections[i];
+            count++;
+        } else if (sea && (transport[i] == SEA || transport[i] == ANY)) {
+            locations[count] = connections[i];
+            count++;
+        }
+    }
+    
+    *numLocations = count;
+    //printf("%d\n", *numLocations);
+    return locations;
 }
 
 /*Awesome idea, but ill comment out now for compilation

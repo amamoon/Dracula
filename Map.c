@@ -24,6 +24,51 @@ struct MapRep {
 
 static void addConnections(Map);
 
+//////////////////////////////////////////
+//          Additional Functions
+//////////////////////////////////////////
+
+//Returns the ammount of connections for a given vertex
+int numOfConnections(Map g, LocationID vertex) {
+    VList curr;
+    curr = g->connections[vertex];
+    
+    int i;
+    i = 0;
+    while (curr != NULL) {
+        curr = curr->next;
+        i++;
+    }
+    
+    return i;
+}
+
+//Loads the locationID and corresponding transport type for a connection,
+//given a starting vertex, into two arrays
+void getConnections(Map g, LocationID vertex,
+                    LocationID *conn, TransportID *transport) {
+                        
+    //Get adjacency list
+    VList curr;
+    curr = g->connections[vertex];
+    
+    //Get amount of connections and malloc array to be returned
+    int count = numOfConnections(g, vertex);
+   
+    //Copy connections from adjacency list
+    int i;
+    for (i=1; i <= count; i++) {
+        conn[i] = curr->v;
+        transport[i] = curr->type;
+        //printf("%d, %d\n", conn[i], transport[i]);
+        curr = curr->next;
+    }
+}
+
+//////////////////////////////////////////
+//          End Additional Functions
+//////////////////////////////////////////
+
 // Create a new empty graph (for a map)
 // #Vertices always same as NUM_PLACES
 Map newMap()
