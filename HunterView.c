@@ -16,6 +16,7 @@ struct hunterView {
     int player[NUM_PLAYERS];
     int health[NUM_PLAYERS];
     PlayerMessage messages[TRAIL_SIZE];
+    LocationID trail[TRAIL_SIZE][NUM_PLAYERS];
     //int hello;
 };
      
@@ -83,6 +84,10 @@ void giveMeTheTrail(HunterView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    int i = 0;
+    for (i = 0; i < TRAIL_SIZE; i++) {
+        trail[i] = currentView->trail[i][player];
+	}
     
 }
 
@@ -93,7 +98,7 @@ LocationID *whereCanIgo(HunterView currentView, int *numLocations,
                         int road, int rail, int sea)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+    return whereCanTheyGo(currentView, numLocations, whoAmI(currentView), road, rail, sea);
 }
 
 // What are the specified player's next possible moves
@@ -101,5 +106,7 @@ LocationID *whereCanTheyGo(HunterView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+   return connectedLocations((GameView)currentView, numLocations,
+   		whereIs(currentView, player), player,giveMeTheRound(currentView),
+   		road, rail, sea);
 }
