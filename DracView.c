@@ -12,16 +12,18 @@ struct dracView {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     GameView Game; //pls no
     int health[NUM_PLAYERS]; //been asking around and apparently this is better as an array? figured it out
-    int nTrap[NUM_MAP_LOCATIONS];
-    int nVamp[NUM_MAP_LOCATIONS];
+    int nTraps[NUM_MAP_LOCATIONS];
+    int nVamps[NUM_MAP_LOCATIONS];
     int score;
     LocationID trail[TRAIL_SIZE][NUM_PLAYERS];
+    LocationID trueLocation;
 };
      
 
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[]){
-
+    DracView dracView = malloc(sizeof(struct dracView));
+    return dracView;
 }
      
      
@@ -72,7 +74,7 @@ void whatsThere(DracView currentView, LocationID where,
                          int *numTraps, int *numVamps){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     *numTraps = currentView->nTraps[where];
-    *numVamps = currentView->nVamps[where]
+    *numVamps = currentView->nVamps[where];
     return;
 }
 
@@ -94,8 +96,8 @@ void giveMeTheTrail(DracView currentView, PlayerID player,
 LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int sea){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     // call connected connections
-    return connectedLocations(currentView->game, numLocations, currentView->trueLocation, 
-    	PLAYER_DRACULA, getRound(currentView->game), road, FALSE, sea);
+    return connectedLocations(currentView->Game, numLocations, currentView->trueLocation, 
+    	PLAYER_DRACULA, getRound(currentView->Game), road, FALSE, sea);
 }
 
 // What are the specified player's next possible moves
@@ -103,6 +105,6 @@ LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     //call connected locations
-    return connectedLocations(currentView->game, numLocations, getLocation(currentView->game, player),
-    	player,getRound(currentView->game), road, rail, sea);;
+    return connectedLocations(currentView->Game, numLocations, getLocation(currentView->Game, player),
+    	player,getRound(currentView->Game), road, rail, sea);
 }
