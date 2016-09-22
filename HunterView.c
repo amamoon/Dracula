@@ -46,7 +46,7 @@ void disposeHunterView(HunterView toBeDeleted)
 Round giveMeTheRound(HunterView currentView)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return currentView->round;
+    return getRound(currentView->Game);
 }
 
 // Get the id of current player
@@ -67,7 +67,7 @@ int giveMeTheScore(HunterView currentView)
 int howHealthyIs(HunterView currentView, PlayerID player)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return currentView->health[player];
+    return getHealth(currentView->Game, player);
 }
 
 // Get the current location id of a given player
@@ -84,10 +84,12 @@ void giveMeTheTrail(HunterView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int i = 0;
+    getHistory(currentView->Game, player, trail);
+    
+    /*int i = 0;
     for (i = 0; i < TRAIL_SIZE; i++) {
         trail[i] = currentView->trail[i][player];
-	}
+	}*/
     
 }
 
@@ -105,8 +107,8 @@ LocationID *whereCanIgo(HunterView currentView, int *numLocations,
 LocationID *whereCanTheyGo(HunterView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-   return connectedLocations((GameView)currentView, numLocations,
+   //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+   return connectedLocations(currentView->Game, numLocations,
    		whereIs(currentView, player), player,giveMeTheRound(currentView),
    		road, rail, sea);
 }
