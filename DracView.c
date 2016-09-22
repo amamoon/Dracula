@@ -22,8 +22,9 @@ struct dracView {
 
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[]){
-    DracView dracView = malloc(sizeof(struct dracView));
-    return dracView;
+    DracView currentView = malloc(sizeof(struct dracView));
+    currentView->Game = newGameView(pastPlays, messages);
+    return currentView;
 }
      
      
@@ -53,7 +54,9 @@ int giveMeTheScore(DracView currentView){
 // Get the current health points for a given player
 int howHealthyIs(DracView currentView, PlayerID player){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return currentView->health[player]; // i see why its gotta be an array
+    return getHealth(currentView->Game, player);
+    
+    //return currentView->health[player]; // i see why its gotta be an array
 }
 
 // Get the current location id of a given player
@@ -84,10 +87,12 @@ void whatsThere(DracView currentView, LocationID where,
 void giveMeTheTrail(DracView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE]){
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int i = 0;
+    getHistory(currentView->Game, player, trail);
+    
+    /*int i = 0;
     for (i = 0; i < TRAIL_SIZE; i++) {
         trail[i] = currentView->trail[i][player];
-	}
+	} */
 }
 
 //// Functions that query the map to find information about connectivity
