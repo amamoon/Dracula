@@ -27,7 +27,7 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     HunterView hunterView = malloc(sizeof(struct hunterView));
     hunterView->Game = newGameView(pastPlays, messages);
-    hunterView->score = 366;
+    hunterView->score = GAME_START_SCORE;
     return hunterView;
 }
      

@@ -10,6 +10,7 @@
 #include "Map.h"
 
 #define TRAIL_SECTION_LENGTH 8
+#define LOCATION_ARRAY_SIZE 3
 
 typedef struct players * Players;
      
@@ -61,7 +62,7 @@ static int nameEqChar(int player, char character){
 static int setScore( char * pastPlays){
     int score = GAME_START_SCORE, i;
     for (i = 0; pastPlays[i] != '\0'; i++){
-        if (i%8== 0){
+        if (i % TRAIL_SECTION_LENGTH == 0){
             if (nameEqChar(PLAYER_DRACULA, pastPlays[i])) score-= SCORE_LOSS_DRACULA_TURN;
             if (!nameEqChar(PLAYER_DRACULA, pastPlays[i]) && pastPlays[i+1] == 'J' && pastPlays[i+2] == 'M')score-=SCORE_LOSS_HUNTER_HOSPITAL;
             if (!nameEqChar(PLAYER_DRACULA, pastPlays[i]) && pastPlays[i+5] == 'V') score-= SCORE_LOSS_VAMPIRE_MATURES;
@@ -92,8 +93,8 @@ static int setTrail(GameView g, int player, char * pastPlays){
             //printf("pastPlays = %s\n", pastPlays);
             //printf("Here\n");
             int j;
-            for (j = 0; j < 7; j++) g->player[player]->trail[trailCount][j] = pastPlays[i+j];
-            g->player[player]->trail[trailCount][7] = '\0';
+            for (j = 0; j < TRAIL_SECTION_LENGTH-1; j++) g->player[player]->trail[trailCount][j] = pastPlays[i+j];
+            g->player[player]->trail[trailCount][TRAIL_SECTION_LENGTH-1] = '\0';
             trailCount++;
         }
     }
@@ -101,9 +102,8 @@ static int setTrail(GameView g, int player, char * pastPlays){
 }
 
 //Determines if two chars are for a sea/ocean
-
 static int trueSea(char first, char second){
-    char * location = malloc(3*sizeof(char));
+    char * location = malloc(LOCATION_ARRAY_SIZE*sizeof(char));
     location[0] = first;
     location[1] = second;
     if (abbrevToID(location) == ADRIATIC_SEA) return 1; //Adreatic Sea
@@ -147,7 +147,7 @@ static int setHealth(GameView g, char * pastPlays, int player){
 
             if (i != 0 && playerTrail[i][1] == playerTrail[i-1][1] && playerTrail[i][2] == playerTrail[i-1][2]) health += LIFE_GAIN_REST;//rest
 
-            if (health <= 0) health = 9;
+            if (health <= 0) health = GAME_START_HUNTER_LIFE_POINTS;
         }
 
     } else {
@@ -166,9 +166,9 @@ static int setHealth(GameView g, char * pastPlays, int player){
 
         int k;
         for (k = 0; pastPlays[k] != '\0'; k++){
-            if (k%8==0 && !nameEqChar(pastPlays[k], PLAYER_DRACULA)){
+            if (k % TRAIL_SECTION_LENGTH ==0 && !nameEqChar(pastPlays[k], PLAYER_DRACULA)){
                 int n;
-                for (n = 3; n < 7; n++){
+                for (n = 3; n < TRAIL_SECTION_LENGTH-1; n++){
                     if (pastPlays[k+n] == 'D')health -= LIFE_LOSS_HUNTER_ENCOUNTER;
                 }
             }
@@ -191,7 +191,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     //printf("Initialising Turn\n");
     gameView->turn = setTurn(pastPlays);
     //printf("Initialising Round\n");
-    gameView->round = (gameView->turn -1)/5;
+    gameView->round = (gameView->turn -1)/NUM_PLAYERS;
     //printf("Initialising Score\n");
     gameView->score = setScore(pastPlays); 
     
@@ -201,7 +201,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
         //printf("Initialising player %d\n", i);
         gameView->player[i] = malloc(sizeof(struct players)); 
         //printf("Initialising trail %d\n", i);
-        gameView->player[i]->trail = malloc(7*GAME_START_SCORE);
+        gameView->player[i]->trail = malloc((TRAIL_SECTION_LENGTH)*GAME_START_SCORE);
         //printf("Initialising set trail %d\n", i);
         gameView->player[i]->trailSize = setTrail(gameView, i, pastPlays);
         if (gameView->player[i]->trail[gameView->player[i]->trailSize] != NULL) gameView->player[i]->trail[gameView->player[i]->trailSize] = NULL;
@@ -213,14 +213,13 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
         //printf("Initialising player %d\n", i);
     gameView->player[PLAYER_DRACULA] = malloc(sizeof(struct players)); 
         //printf("Initialising trail %d\n", i);
-    gameView->player[PLAYER_DRACULA]->trail = malloc(7*GAME_START_SCORE);
+    gameView->player[PLAYER_DRACULA]->trail = malloc(TRAIL_SECTION_LENGTH*GAME_START_SCORE);
         //printf("Initialising set trail %d\n", i);
     gameView->player[PLAYER_DRACULA]->trailSize = setTrail(gameView, PLAYER_DRACULA, pastPlays);
     if (gameView->player[i]->trail[gameView->player[PLAYER_DRACULA]->trailSize] != NULL) gameView->player[i]->trail[gameView->player[PLAYER_DRACULA]->trailSize] = NULL;
 
         //printf("Initialising health %d\n", i);
     gameView->player[PLAYER_DRACULA]->health = setHealth(gameView, pastPlays, PLAYER_DRACULA);
-    //TODO gameView->messages = messages;
 
     //printView(gameView, pastPlays);
     
@@ -257,7 +256,7 @@ Round getRound(GameView currentView)
 // Get the id of current player - ie whose turn is it?
 PlayerID getCurrentPlayer(GameView currentView)
 {
-    return ((currentView->turn - 1) % 5);
+    return ((currentView->turn - 1) % NUM_PLAYERS);
 }
 
 // Get the current score
@@ -279,7 +278,7 @@ LocationID getLocation(GameView currentView, PlayerID player)
     for (i = 0; currentView->player[player]->trail[i] != NULL; i++){}
     i--;
     if (i < 0) return UNKNOWN_LOCATION;
-    char * location = malloc(3*sizeof(char));
+    char * location = malloc(LOCATION_ARRAY_SIZE*sizeof(char));
     location[0] = currentView->player[player]->trail[i][1];
     location[1] = currentView->player[player]->trail[i][2];
     location[2] = '\0';
@@ -297,14 +296,15 @@ LocationID getLocation(GameView currentView, PlayerID player)
 
 //// Functions that return information about the history of the game
 
-// Fills the trail array with the location ids of the last 6 turns
+// Fills the trail array with the location ids of the last 6 locations for the given playe
+//Several exceptions for dracula
 // Slighlty adjusted this function -J
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
     int i, n = 0;
-    char * location = malloc(3*sizeof(char));
-    for(i = currentView->player[player]->trailSize -1; (i >=0 && n < 6); i--){
+    char * location = malloc(LOCATION_ARRAY_SIZE*sizeof(char));
+    for(i = currentView->player[player]->trailSize -1; (i >=0 && n < TRAIL_SIZE); i--){
         location[0] = currentView->player[player]->trail[i][1];
         location[1] = currentView->player[player]->trail[i][2];
         location[2] = '\0';

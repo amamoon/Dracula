@@ -8,6 +8,8 @@
 #include "DracView.h"
 #include <string.h>
 
+#define TRAIL_SECTION_LENGTH 8
+#define LOCATION_ARRAY_SIZE 3
 // #include "Map.h" ... if you decide to use the Map ADT
      
 struct dracView {
@@ -29,9 +31,9 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[]){
         
     // Parsing pastPlays to set traps and vampires in cities
     int pastPlayLength = strlen(pastPlays);
-    int index = 32; //Index to Dracula's first play in the string
+    int index = (NUM_PLAYERS-1)*TRAIL_SECTION_LENGTH; //Index to Dracula's first play in the string
     while(index < pastPlayLength - 1) {
-        char location[3] = {0};
+        char location[LOCATION_ARRAY_SIZE] = {0};
         location[0] = pastPlays[index+1];
         location[1] = pastPlays[index+2];
         location[2] = '\0';
@@ -44,8 +46,8 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[]){
             currentView->nVamps[locationID]++;
         }
         if (pastPlays[index+5] == 'M' || pastPlays[index+5] == 'V') {
-            int lostCity = index - 240; // 6 rounds * 40 chars per round, to get Dracula's play that was 6 rounds ago
-            char lostLocation[3] = {0};
+            int lostCity = index - TRAIL_SIZE*NUM_PLAYERS*TRAIL_SECTION_LENGTH; // 6 rounds * 40 chars per round, to get Dracula's play that was 6 rounds ago
+            char lostLocation[LOCATION_ARRAY_SIZE] = {0};
             lostLocation[0] = pastPlays[lostCity+1];
             lostLocation[1] = pastPlays[lostCity+2];
             lostLocation[2] = '\0';
@@ -58,7 +60,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[]){
             }
         }
         
-        index += 40; // Distance to next Dracula play in string
+        index += NUM_PLAYERS*TRAIL_SECTION_LENGTH; // Distance to next Dracula play in string
     }
     
     return currentView;
