@@ -6,6 +6,8 @@
 #include "Game.h"
 #include "HunterView.h"
 
+#define MAGIC_NUMBER 1589
+
 void decideHunterMove(HunterView gameState)
 {
     // TODO ...
@@ -13,10 +15,11 @@ void decideHunterMove(HunterView gameState)
 	char * location = malloc(2*sizeof(char));
 	char * message = malloc(MESSAGE_SIZE*sizeof(char));
 	PlayerID player = whoAmI(gameState);
-	int maxRail = ((int)player + giveMeTheRound(gameState)) % 4;
+	int round =giveMeTheRound(gameState);
+	int maxRail = ((int)player + round) % 4;
 
 	//If I can see any of draculas recent locations, pop "H**" with ** being the location
-	LocationID * trail = malloc(TRAIL_SIZE*sizeof(LocationID));
+	/*LocationID * trail = malloc(TRAIL_SIZE*sizeof(LocationID));
 	giveMeTheTrail(gameState, player, trail);
 
 	int i;
@@ -27,16 +30,22 @@ void decideHunterMove(HunterView gameState)
 			message[2] = (char)(trail[i]%10 +'0');
 			message[3] = '\0';
 		}
+	}*/
+
+	if (round == 0){
+		registerBestPlay("GE", message);
+		return;
 	}
 
 	//Move to a random spot
 	int numLocs;
 	LocationID *locations = whereCanIgo(gameState, &numLocs, TRUE, maxRail, TRUE);
 
-	srand(69);
+
+	srand(MAGIC_NUMBER);
 
 	LocationID selection = locations[rand() % numLocs];
-	location = idToName(selection);
+	location = idToAbbrev(selection);
 
     registerBestPlay(location, message);
 }

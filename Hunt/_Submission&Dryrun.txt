@@ -1,0 +1,8 @@
+DRYRUN:
+1927 dryrun ass2b Makefile FILES
+
+SUBMISSION
+give cs1927 ass2b Makefile FILES
+
+FILES
+dracula.c hunter.c GameView.c GameView.h DracView.c DracView.h HunterView.c HunterView.h Map.h Map.c Places.h Places.c
