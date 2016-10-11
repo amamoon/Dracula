@@ -136,3 +136,17 @@ int abbrevToID(char *abbrev)
    }
    return NOWHERE;
 }
+
+//given an ID number, return its Place abbreviation
+char *idToAbbrev(int location) {
+   //Modified code from abbrevToID function
+   Place *p;
+   Place *first = &places[MIN_MAP_LOCATION];
+   Place *last = &places[MAX_MAP_LOCATION];
+   for (p = first; p <= last; p++) {
+       if (p->id == location) {
+           return p->abbrev;
+       }
+   }
+   return NULL;
+}
