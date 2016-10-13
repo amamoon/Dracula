@@ -17,7 +17,64 @@ void decideHunterMove(HunterView gameState)
 	PlayerID player = whoAmI(gameState);
 	int round =giveMeTheRound(gameState);
 	int maxRail = ((int)player + round) % 4;
+	//printf("%d\n", maxRail);
 
+	//On the first turn, spread the 4 hunters out across the board
+	if (round == 0){
+		switch (player){
+			case PLAYER_LORD_GODALMING :
+			registerBestPlay("SR", "Saragoss(Spain)"); break;
+			case PLAYER_DR_SEWARD :
+			registerBestPlay("PA", "Paris(France)"); break;
+			case PLAYER_VAN_HELSING :
+			registerBestPlay("SZ", "Szeged(Yugoslavia)"); break;
+			case PLAYER_MINA_HARKER :
+			registerBestPlay("LI", "Leipzig(Germany)"); break;
+		}
+		return;
+	}
+	printf("%d", player);
+
+	//See if Draculas position is known and set the most recent know location to be the target
+	LocationID * dracTrail = malloc(TRAIL_SIZE*sizeof(LocationID));
+	LocationID target = CITY_UNKNOWN;
+	giveMeTheTrail(gameState, PLAYER_DRACULA, dracTrail);
+	int i;
+	printf("dracTrail = (");
+	for(i = 0; dracTrail[i] != '\0'; i++){
+		printf("%s,", idToAbbrev(dracTrail[i]));
+		if (dracTrail[i] >= MIN_MAP_LOCATION && dracTrail[i] <= MAX_MAP_LOCATION && target == CITY_UNKNOWN){
+			target = dracTrail[i];
+		}
+	}
+	printf(")\n");
+
+	printf("Target = %s\n", idToAbbrev(target));
+
+	//Move to a random spot
+	int numLocs;
+	LocationID *locations = whereCanIgo(gameState, &numLocs, TRUE, maxRail, TRUE);
+	printf("Where Can I go from %s with %d rail moves = (", idToAbbrev(whereIs(gameState, player)), maxRail);
+	for(i = 0; locations[i] != '\0'; i++) {
+		printf("%s,", idToAbbrev(locations[i]));
+		if (locations[i] == target){
+			registerBestPlay(idToAbbrev(target), message);
+			return;
+		}
+	}
+	printf(")\n");
+
+
+	srand(MAGIC_NUMBER);
+	LocationID selection = locations[rand() % numLocs];
+	location = idToAbbrev(selection);
+
+    registerBestPlay(location, message);
+}
+
+
+	//**I had a look and I dont think messages are gonna help us much**
+	//**Ill leave it here in case we wanna add it back in**
 	//If I can see any of draculas recent locations, pop "H**" with ** being the location
 	/*LocationID * trail = malloc(TRAIL_SIZE*sizeof(LocationID));
 	giveMeTheTrail(gameState, player, trail);
@@ -31,21 +88,3 @@ void decideHunterMove(HunterView gameState)
 			message[3] = '\0';
 		}
 	}*/
-
-	if (round == 0){
-		registerBestPlay("GE", message);
-		return;
-	}
-
-	//Move to a random spot
-	int numLocs;
-	LocationID *locations = whereCanIgo(gameState, &numLocs, TRUE, maxRail, TRUE);
-
-
-	srand(MAGIC_NUMBER);
-
-	LocationID selection = locations[rand() % numLocs];
-	location = idToAbbrev(selection);
-
-    registerBestPlay(location, message);
-}

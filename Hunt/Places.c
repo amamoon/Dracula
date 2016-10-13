@@ -105,13 +105,6 @@ int idToType(LocationID p)
    return places[p].type;
 }
 
-// given a Place number, return its abbrev
-char * idToAbbrev(LocationID p)
-{
-   assert(validPlace(p));
-   return places[p].abbrev;
-}
-
 // given a Place name, return its ID number
 // binary search
 int nameToID(char *name)
