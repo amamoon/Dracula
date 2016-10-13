@@ -33,8 +33,6 @@ void decideHunterMove(HunterView gameState)
 		}
 		return;
 	}
-	printf("%d", player);
-
 	//See if Draculas position is known and set the most recent know location to be the target
 	LocationID * dracTrail = malloc(TRAIL_SIZE*sizeof(LocationID));
 	LocationID target = CITY_UNKNOWN;

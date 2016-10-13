@@ -440,8 +440,8 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
 
     Map europe = newMap();
     int drac = (player == PLAYER_DRACULA);
-    int railLength = (player + round) % 4;
-
+    int railLength = (player + round-1) % 4;
+    printf("%d, %d, %d\n", player, round, railLength);
     if (!rail) railLength = 0;
     if (drac) railLength = 0;
 
